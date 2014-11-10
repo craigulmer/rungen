@@ -51,8 +51,12 @@ def parseKML(filename):
     sys.exit(-3)
 
 
-def genHeader(activity_type, time_plain, time_zulu):
-    s = """<?xml version="1.0" encoding="UTF-8"?>
+
+def dumpGPX(activity_type, time_plain, utc_dt, track):
+
+    time_zulu = utc_dt.strftime(ZULU_FMT)
+
+    print """<?xml version="1.0" encoding="UTF-8"?>
 <gpx
   version="1.1"
   creator="RunKeeper - http://www.runkeeper.com"
@@ -60,11 +64,15 @@ def genHeader(activity_type, time_plain, time_zulu):
   xmlns="http://www.topografix.com/GPX/1/1"
   xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd"
   xmlns:gpxtpx="http://www.garmin.com/xmlschemas/TrackPointExtension/v1">
-<trk>
-"""    
-    s=s+"  <name><![CDATA["+activity_type +" "+time_plain+"]]></name>\n"
-    s=s+"  <time>"+time_zulu+"</time>"
-    return s
+<trk>"""    
+    print "  <name><![CDATA["+activity_type +" "+time_plain+"]]></name>"
+    print "  <time>"+time_zulu+"</time>"
+    print "  <trkseg>"
+    for v in track:
+        print "    <trkpt lat=\"{0}\" lon=\"{1}\"><time>{2}</time></trkpt>".format(v[1],v[0],v[2])
+    print "  </trkseg>"
+    print "</trk>"
+    print "</gpx>"
 
 def genCircle(num_points, origin, radius_mi):
     
@@ -239,14 +247,8 @@ def main(argv):
         sys.stdout = open(output_filename,'w')
 
 
-    s = genHeader("running", time_string, utc_dt.strftime(ZULU_FMT))
-    print s
-    print "<trkseg>"
-    for v in track:
-        print "<trkpt lat=\"{0}\" lon=\"{1}\"><time>{2}</time></trkpt>".format(v[1],v[0],v[2])
-    print "</trkseg>"
-    print "</trk>"
-    print "</gpx>"
+    dumpGPX("running", time_string, utc_dt, track)
+
 
 #print track
 
