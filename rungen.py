@@ -74,6 +74,47 @@ def dumpGPX(activity_type, time_plain, utc_dt, track):
     print "</trk>"
     print "</gpx>"
 
+def dumpTCX(activity_type, time_plain, utc_dt, track, avg_heart_rate):
+
+    time_zulu = utc_dt.strftime(ZULU_FMT)
+
+
+    print """<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<TrainingCenterDatabase xmlns="http://www.garmin.com/xmlschemas/TrainingCenterDatabase/v2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.garmin.com/xmlschemas/TrainingCenterDatabase/v2 http://www.garmin.com/xmlschemas/TrainingCenterDatabasev2.xsd">"""
+    print "<Activities>"
+    print "  <Activity Sport=\""+activity_type+"\">"
+    print "    <Id>"+time_zulu+"</Id>"
+    print "      <Lap StartTime=\""+time_zulu+"\">"
+    #print "       <TotalTimeSeconds>"+time_seconds+"</TotalTimeSeconds>"
+    #print "       <MaximumSpeed>"+max_speed+"</MaximumSpeed>"
+    #print "       <Calories></Calories>"
+    print "       <Intensity>Active</Intensity>"
+    print "       <TriggerMethod>Location</TriggerMethod>"
+    print "       <Track>"
+    for v in track:
+        heart_rate = int(uniform(avg_heart_rate - 5, avg_heart_rate + 5))
+        print "      <Trackpoint>"
+        print "        <Time>{0}</Time>".format(v[2])
+        print "        <Position>"
+        print "           <LatitudeDegrees>{0}</LatitudeDegrees>".format(v[1])
+        print "           <LongitudeDegrees>{0}</LongitudeDegrees>".format(v[0])
+        print "        </Position>"
+        print "        <AltitudeMeters>0</AltitudeMeters>"
+        print "        <DistanceMeters>0.00000</DistanceMeters>"
+        print "        <SensorState>Absent</SensorState>"
+        print "        <HeartRateBpm><Value>"+str(heart_rate)+"</Value></HeartRateBpm>"
+        print "      </Trackpoint>"
+    print "       </Track>"
+    print "      </Lap>"
+    print "  </Activity>"
+    print "</Activities>"
+    print "</TrainingCenterDatabase>"
+
+#http://code.google.com/p/garmintrainer/source/browse/src/main/resources/sample.tcx?r=2731327960cd35d1e1be0612082a7060a19cabf7
+
+
+
+
 def genCircle(num_points, origin, radius_mi):
     
     degree_to_rad = float(pi/180.0)
@@ -247,7 +288,8 @@ def main(argv):
         sys.stdout = open(output_filename,'w')
 
 
-    dumpGPX("running", time_string, utc_dt, track)
+    #dumpGPX("running", time_string, utc_dt, track)
+    dumpTCX("running", time_string, utc_dt, track, 143)
 
 
 #print track
